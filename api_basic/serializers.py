@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Article
-
+'''
 class ArticleSerializers(serializers.Serializer):
     title = serializers.CharField(max_length=100)
     author = serializers.CharField(max_length=100)
@@ -18,4 +18,9 @@ class ArticleSerializers(serializers.Serializer):
         instance.save()
         return instance
 
+'''
 
+class ArticleSerializers(serializers.ModelSerializer):
+    class Meta:
+        model=Article
+        fields=['id','title','author']
