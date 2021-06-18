@@ -11,8 +11,54 @@ from rest_framework.views import APIView
 from rest_framework import generics, mixins
 from rest_framework.authentication import BasicAuthentication,SessionAuthentication,TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework import viewsets
+from django.shortcuts import get_object_or_404
 # Create your views here.
+
+
+class GenericViewSet(viewsets.GenericViewSet,mixins.ListModelMixin ,mixins.CreateModelMixin):
+    serializer_class = ArticleSerializers
+    queryset = Article.objects.all()
+
+    def get(self,request):
+        return self.list(request)
+
+
+    def post(self,request):
+        return self.create(request)
+
+
+class ArticleViewSet(viewsets.ViewSet):
+
+    def get(self,request):
+        articles = Article.objects.all()
+        serializer = ArticleSerializers(articles, many=True)
+        return Response(serializer.data)
+
+    def create(self,request):
+        searializer = ArticleSerializers(data=request.data)
+        if searializer.is_valid():
+            searializer.save()
+            return Response(searializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(searializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self,request,pk=None):
+        queryset = Article.objects.all()
+        article=get_object_or_404(queryset,pk=pk)
+        serializer = ArticleSerializers(article)
+        return Response(serializer.data)
+
+    def update(self,request,pk=None):
+        article = Article.objects.get(pk=pk)
+        searializer = ArticleSerializers(article, data=request.data)
+
+        if searializer.is_valid():
+            searializer.save()
+            return Response(searializer.data)
+
+        return Response(searializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class GenericAPIView(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
     serializer_class = ArticleSerializers
@@ -142,5 +188,4 @@ def article_details(request, pk):
 
     elif request.method == 'DELETE':
         article.delete()
-        # return HttpResponse(status=204)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        # return Ht
